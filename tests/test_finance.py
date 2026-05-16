@@ -39,6 +39,16 @@ def test_invalid_transaction(database):
     assert reg.addTransaction(database, 2026, 4, 25, 100.00, 'CHECKING', 'INCOME', 'NONE') == False
     assert reg.addTransaction(database, 2026, 4, 25, 100.00, 'SAVINGS', 'TAXES', 'NONE') == False
 
+def test_match_transactions(database):
+    '''test the matching and unmatching of transaction pairs'''
+    assert reg.addTransaction(database, 2026, 5, 14, 100.00, 'SAVINGS', 'INCOME', 'NONE') == True
+    assert reg.addTransaction(database, 2026, 5, 15, -100.00, 'SAVINGS', 'FOOD', 'NONE') == True
+    assert reg.matchTransactions(database, 1, 2) == True
+    assert reg.unmatchTransactions(database, 1, 2) == True
+
+    assert reg.addTransaction(database, 2026, 5, 15, -99.00, 'SAVINGS', 'FOOD', 'NONE') == True
+    assert reg.matchTransactions(database, 1, 3) == False
+
 def test_valid_investments(database):
     """test the creation of investments"""
     assert inv.addInvestment(database, 2026, 4, 25, 'VTSAX', 500, 1.0, 'BROKERAGE') == True

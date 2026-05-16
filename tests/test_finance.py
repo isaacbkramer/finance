@@ -32,6 +32,7 @@ def test_valid_transaction(database):
     series = totals.loc[totals['account'] == 'SAVINGS', 'total']
     assert len(series) == 1
     assert series.iloc[0] == 100.00
+    assert reg.deleteTransaction(database, 1)
 
 def test_invalid_transaction(database):
     """test the creation and rejection of invalid transactions"""

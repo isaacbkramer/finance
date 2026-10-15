@@ -6,6 +6,7 @@ import register
 import investments
 import csvreader
 import database
+import paychecks
 from pathlib import Path
 
 def startup() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
@@ -16,6 +17,7 @@ def startup() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
     categories.createCategoriesTable(cur)
     register.createTransactionsTable(cur)
     investments.createInvestmentsTable(cur)
+    paychecks.createPaychecksTable(cur)
     print('\n########## WELCOME TO FINANCE-CLI ##########\n')
     print('Follow the prompts or type "exit" at any time to terminate the program.\n')
     return db, cur
@@ -59,7 +61,7 @@ def readDate() -> tuple[int,int,int]:
 if __name__ == "__main__":
     db, cur = startup()
     while True:
-        command = input("transactions investments accounts totals exit: ").lower()
+        command = input("transactions investments accounts totals paychecks exit: ").lower()
         if command == 'transactions':
             while True:
                 command = input("add delete modify match unmatch view exit: ").lower()
@@ -184,6 +186,34 @@ if __name__ == "__main__":
                 print(register.getMonthlyTotals(cur).to_markdown(index=False))
             elif command == 'account':
                 print(register.getAccountTotals(cur))
+        elif command == 'paychecks':
+            while True:
+                command = input("add delete view exit: ").lower()
+                if command =='add':
+                    date = readDate()
+                    gross = float(input("Gross Pay: "))
+                    federal = float(input("Federal Tax: "))
+                    state = float(input("State Tax: "))
+                    local = float(input("Local Tax: "))
+                    medicare = float(input("Medicare Tax: "))
+                    socialsecurity = float(input("Social Security Tax: "))
+                    health = float(input("Health Insurance: "))
+                    dental = float(input("Dental Insurance: "))
+                    vision = float(input("Vision Insurance: "))
+                    hsa = float(input("HSA Contribution: "))
+                    k = float(input("401k Contribution: "))
+                    rothk = float(input("Roth 401k Contribution: "))
+                    paychecks.addPaycheck(cur, date[0],date[1],date[2],gross,federal,state,local,medicare,socialsecurity,health,dental,vision,hsa,k,rothk)
+                elif command == 'delete':
+                    id = int(input("id: "))
+                    paychecks.deletePaycheck(cur, id)
+                elif command == 'view':
+                    print(paychecks.getPaychecks(db).to_markdown(index=False))
+                elif command == 'exit':
+                    break
+                else:
+                    print('invalid input')
+                    continue
         elif command == 'exit':
             shutdown(db)
         else: 

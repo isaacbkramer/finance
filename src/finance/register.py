@@ -79,20 +79,20 @@ def modifyTransactionTag(db:sqlite3.Cursor, id:int, tag:str) -> bool:
     db.execute(sql,(tag,id))
     return True
 
-def matchTransactions(db:sqlite3.Cursor, id1:int, id2:int):
+def matchTransactions(db:sqlite3.Cursor, id1:int, id2:int) -> bool:
+    '''match two transactions as a transfer'''
     sql = f'SELECT value FROM transactions WHERE id IN (?,?)'
     db.execute(sql,(id1,id2))
     if sum([value[0] for value in db.fetchall()]) == 0:
         sql = f'UPDATE transactions SET match=? WHERE id=?'
-        db.execute(sql, (id1,id2))
-        db.execute(sql, (id2,id1))
+        db.executemany(sql, [(id1,id2),(id2,id1)])
         return True
     return False
 
-def unmatchTransactions(db:sqlite3.Cursor, id1:int, id2:int):
+def unmatchTransactions(db:sqlite3.Cursor, id1:int, id2:int) -> bool:
+    '''unmatch a pair of transactions'''
     sql = f'UPDATE transactions SET match=NULL WHERE id=?'
-    db.execute(sql, (id1,))
-    db.execute(sql, (id2,))
+    db.executemany(sql, [(id1,), (id2,)])
     return True
 
 def getTransactions(db:sqlite3.Connection) -> pd.DataFrame:
